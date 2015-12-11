@@ -1,10 +1,8 @@
-第 16 天：善用版本日誌 git reflog 追蹤變更軌跡
-============================================================
+# 第 16 天：善用版本日誌 git reflog 追蹤變更軌跡
 
 其實學習 Git 版本控管的指令操作並不難，但要弄清楚 Git 到底對我的儲存庫做了什麼事，還真不太容易。當你一步步了解 Git 的核心與運作原理，自然能有效掌控 Git 儲存庫中的版本變化。本篇文章，就來說說 Git 如何記錄我們的每一版的變更軌跡。
 
-了解版本紀錄的過程
------------------
+## 了解版本紀錄的過程
 
 在清楚理解 Git 基礎原理與物件結構之前，你不可能了解版本紀錄的過程。而當你不了解版本紀錄的過程，自然會擔心「到底我的版本到哪去了」，也許有人跟你說「我們用了版本控管，所以所有版本都會留下，你大可放心改 Code」。知道是一回事，知不知道怎麼做又是一回事，然後是不是真的做得到又是另外一回事。我們在版控的過程中盡情 commit 建立版本，但如果有一天發現有某個版本改壞了，或是因為執行了一些合併或重置等動作導致版本消失了，那又該怎麼辦呢？
 
@@ -20,10 +18,13 @@
 
 我們開啟該檔看看其內容 (其中物件 id 的部分我有刻意稍作刪減，以免每行的內容過長)：
 
-	0000000 f5685e0 Will <xxxx@gmail.com> 1381718394 +0800	commit (initial): Initial commit
-	f5685e0 38d924f Will <xxxx@gmail.com> 1381718395 +0800	commit: a.txt: set 1 as content
-	38d924f efa1e0c Will <xxxx@gmail.com> 1381734238 +0800	commit: test
-	efa1e0c af493e5 Will <xxxx@gmail.com> 1381837967 +0800	commit: Add c.txt
+``` 
+0000000 f5685e0 Will <xxxx@gmail.com> 1381718394 +0800	commit (initial): Initial commit
+f5685e0 38d924f Will <xxxx@gmail.com> 1381718395 +0800	commit: a.txt: set 1 as content
+38d924f efa1e0c Will <xxxx@gmail.com> 1381734238 +0800	commit: test
+
+efa1e0c af493e5 Will <xxxx@gmail.com> 1381837967 +0800	commit: Add c.txt
+```
 
 從這裡你將可看出目前在這個分之下曾經記錄過 4 個版本，此時我們用 `git reflog` 即可列印出所有「歷史紀錄」的版本變化，你會發現內容是一樣的，但順序正好顛倒。從文字檔中看到的內容，「第一版」在最上面，而透過 `git reflog` 則是先顯示「最新版」最後才是「第一版」：
 
@@ -35,8 +36,7 @@
 
 從上圖你可以發現到，這裡有個特殊的「參考名稱」為 `HEAD@{0}`，這裡每個版本都會有一個歷史紀錄都會有個編號，代表著這個版本的在記錄檔中的順位。如果是 `HEAD@{0}` 的話，永遠代表目前分支的「最新版」，換句話說就是你在這個「分支」中最近一次對 Git 操作的紀錄。你對 Git 所做的任何版本變更，全部都會被記錄下來。
 
-復原意外地變更
---------------
+## 復原意外地變更
 
 初學者剛開始使用 Git 很有可能會不小心執行錯誤，例如透過 `git merge` 執行合併時發生了衝突，或是透過 `git pull` 取得遠端儲存庫最新版時發生了失誤。在這種情況下，你可以利用 `HEAD@{0}` 這個特殊的「參考名稱」來對此版本「定位」，並將目前的 Git 儲存庫版本回復到前一版或前面好幾版。
 
@@ -48,8 +48,7 @@
 
 ![image](https://f.cloud.github.com/assets/88981/1333591/e5be654e-3597-11e3-9080-7d3bf82f63f6.png)
 
-紀錄版本變更的原則
------------------
+## 紀錄版本變更的原則
 
 事實上在使用 Git 版控的過程中，有很多機會會產生「版本歷史紀錄」，我說的並不是單純的 `git log` 顯示版本紀錄，而是原始且完整的變更歷史紀錄。這些紀錄版本變更有個基本原則：【只要你透過指令修改了任何參照(ref)的內容，或是變更任何分支的 `HEAD` 參照內容，就會建立歷史紀錄】。也因為這個原則，所以指令名稱才會稱為 `reflog`，因為是改了 `ref` (參照內容) 才引發的 `log` (紀錄)。
 
@@ -72,22 +71,19 @@
 
 除此之外，每一個分支、每一個暫存版本(stash)，都會有自己的 reflog 歷史紀錄，這些資料也全都會儲存在 `.git\logs\refs\` 資料夾下。
 
-只顯示特定分支的 reflog 紀錄
-----------------------------
+## 只顯示特定分支的 reflog 紀錄
 
 在查詢歷史紀錄時，你也可以針對特定分支(Branch)進行查詢，僅顯示特定分支的變更歷史紀錄，如下圖示：
 
 ![image](https://f.cloud.github.com/assets/88981/1333693/1e095bfa-359a-11e3-814b-84f873d282fb.png)
 
-顯示 reflog 的詳細版本記錄
---------------------------
+## 顯示 reflog 的詳細版本記錄
 
 我們已經學會用 `git reflog` 就可以取出版本歷史紀錄的摘要資訊。但如果我們想要顯示每一個 reflog 版本中，每一個版本的完整 commit 內容，那麼你可以用 `git log -g` 指令顯示出來：
 
 ![image](https://f.cloud.github.com/assets/88981/1333836/34814278-359d-11e3-9846-6c006291f1c2.png)
 
-刪除特定幾個版本的歷史紀錄
-------------------------
+## 刪除特定幾個版本的歷史紀錄
 
 基本上，版本日誌(reflog)所記錄的只是變更的歷程，而且預設只會儲存在「工作目錄」下的 `.git/` 目錄裡，這裡所記錄的一樣只是 commit 物件的指標而已。無論你對這些紀錄做任何操作，不管是竄改、刪除，都不會影響到目前物件儲存庫的任何內容，也不會影響版本控管的任何資訊。
 
@@ -97,8 +93,7 @@
 
 **註**：這些版本日誌預設並不會被同步到「遠端儲存庫」，以免多人開發時大家互相影響，所以版本日誌算是比較個人的東西。
 
-設定歷史紀錄的過期時間
----------------------
+## 設定歷史紀錄的過期時間
 
 當你的 Git 儲存庫越用越久，可想見這份歷史紀錄將會越累積越多，這樣難道不會爆掉嗎？還好，預設來說 Git 會幫你保存這些歷史紀錄 90 天，如果這些紀錄中已經有些 commit 物件不在分支線上，則預設會保留 30 天。
 
@@ -106,44 +101,50 @@
 
 如果你想修改預設的過期期限，可以透過 `git config gc.reflogExpire` 與 `git config gc.reflogExpireUnreachable` 來修正這兩個過期預設值。如果你的硬碟很大，永遠不想刪除紀錄，可以考慮設定如下：
 
-	git config --global gc.reflogExpire "never"
-	git config --global gc.reflogExpireUnreachable "never"
+``` 
+git config --global gc.reflogExpire "never"
+git config --global gc.reflogExpireUnreachable "never"
+```
 
 如果只想保存 7 天，則可考慮設定如下：
 
-	git config --global gc.reflogExpire "7 days"
-	git config --global gc.reflogExpireUnreachable "7 days"
+``` 
+git config --global gc.reflogExpire "7 days"
+git config --global gc.reflogExpireUnreachable "7 days"
+```
 
 **註**：從上述範例所看到的 `7 days` 這段字，我找了好久都沒有看到完整的說明文件，最後終於找到 Git 處理日期格式的原始碼(C語言)，有興趣的也可以看看：[http://git.kernel.org/cgit/git/git.git/tree/date.c](http://git.kernel.org/cgit/git/git.git/tree/date.c)
 
 除此之外，你也可以針對特定分支設定其預設的過期時間。例如我想讓 `master` 分支只保留 14 天期，而 `develop` 分支可以保留完整記錄，那麼你可以這樣設定：(注意: 以下範例我把設定儲存在本地儲存庫中，所以使用了 `--local` 參數)
 
-	git config --local gc.master.reflogExpire "14 days"
-	git config --local gc.master.reflogExpireUnreachable "14 days"
+``` 
+git config --local gc.master.reflogExpire "14 days"
+git config --local gc.master.reflogExpireUnreachable "14 days"
 
-	git config --local gc.develop.reflogExpire "never"
-	git config --local gc.develop.reflogExpireUnreachable "never"
+git config --local gc.develop.reflogExpire "never"
+git config --local gc.develop.reflogExpireUnreachable "never"
+```
 
 上述指令寫入到 `.git\config` 的內容將會是：
 
-	[gc "master"]
-		reflogExpire = 14 days
-		reflogExpireUnreachable = 14 days
-	[gc "develop"]
-		reflogExpire = never
-		reflogExpireUnreachable = never
+``` 
+[gc "master"]
+	reflogExpire = 14 days
+	reflogExpireUnreachable = 14 days
+[gc "develop"]
+	reflogExpire = never
+	reflogExpireUnreachable = never
+```
 
-
-清除歷史紀錄
--------------
+## 清除歷史紀錄
 
 若要立即清除所有歷史紀錄，可以使用 `git reflog expire --expire=now --all` 指令完成刪除工作，最後搭配 `git gc` 重新整理或清除那些找不到、無法追蹤的版本。如下圖示：
 
 ![image](https://f.cloud.github.com/assets/88981/1333880/19f26616-359e-11e3-835e-7dee15b9c146.png)
 
 
-今日小結
--------
+
+## 今日小結
 
 Git 的版本日誌(reflog)幫我們記憶在版控過程中的所有變更，幫助我們「回憶」到底這段時間到底對 Git 儲存庫做了什麼事。不過你也要很清楚的知道，這些只是個「日誌」而已，不管有沒有這些日誌，都不影響我們 Git 儲存庫中的任何版本資訊。
 
@@ -160,9 +161,7 @@ Git 的版本日誌(reflog)幫我們記憶在版控過程中的所有變更，�
 * git config --global gc.reflogExpire "never"
 * git config --global gc.reflogExpireUnreachable "never"
 
-
-參考連結
--------
+## 參考連結
 
 * [git-reflog(1) Manual Page](http://git-scm.com/docs/git-reflog)
 * [git-gc(1) Manual Page](http://git-scm.com/docs/git-gc)
